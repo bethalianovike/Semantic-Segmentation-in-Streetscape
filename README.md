@@ -38,7 +38,7 @@ inputs
 ```
 2. Preprocess
 3. Train model
-`python train.py --dataset cityscapes --arch NestedUNet --num_classes 29 --deep_supervision True --epochs 200` -> with Deep Supervision
+```python train.py --dataset cityscapes --arch NestedUNet --num_classes 29 --deep_supervision True --epochs 200``` -> with Deep Supervision
 `python train.py --dataset cityscapes --arch NestedUNet --num_classes 29 --deep_supervision False --epochs 200` -> without Deep Supervision
 4. Evaluate and Visualize
 `python val_beth.py --name cityscapes_NestedUNet_wDS` -> with Deep Supervision
