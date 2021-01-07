@@ -136,7 +136,7 @@ def main():
             avg_meters['dice'].update(dice, input.size(0))
 
             output = torch.sigmoid(output).cpu().numpy()
-  
+
             for i in range(len(output)):
                 #mask6 = (output[i, 6] + output[i, 10] * 255).astype('uint8')
                 # mask = np.zeros((256, 512))

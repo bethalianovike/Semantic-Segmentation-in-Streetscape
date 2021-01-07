@@ -35,7 +35,7 @@ def parse_args():
                         help='number of total epochs to run')
     parser.add_argument('-b', '--batch_size', default=16, type=int,
                         metavar='N', help='mini-batch size (default: 16)')
-    
+
     # model
     parser.add_argument('--arch', '-a', metavar='ARCH', default='NestedUNet',
                         choices=ARCH_NAMES,
@@ -51,14 +51,14 @@ def parse_args():
                         help='image width')
     parser.add_argument('--input_h', default=96, type=int,
                         help='image height')
-    
+
     # loss
     parser.add_argument('--loss', default='BCEDiceLoss',
                         choices=LOSS_NAMES,
                         help='loss: ' +
                         ' | '.join(LOSS_NAMES) +
                         ' (default: BCEDiceLoss)')
-    
+
     # dataset
     parser.add_argument('--dataset', default='dsb2018_96',
                         help='dataset name')
@@ -93,7 +93,7 @@ def parse_args():
     parser.add_argument('--gamma', default=2/3, type=float)
     parser.add_argument('--early_stopping', default=-1, type=int,
                         metavar='N', help='early stopping (default: -1)')
-    
+
     parser.add_argument('--num_workers', default=4, type=int)
     parser.add_argument('--resume',default=False ,type=bool)
 
@@ -195,7 +195,7 @@ def main():
             config['name'] = '%s_%s_wDS' % (config['dataset'], config['arch'])
         else:
             config['name'] = '%s_%s_woDS' % (config['dataset'], config['arch'])
-    
+
         os.makedirs('models/%s' % config['name'], exist_ok=True)
     else:
         if config['resume'] == True:
@@ -215,7 +215,7 @@ def main():
                                            config['input_channels'],
                                            config['deep_supervision'])
 
-    
+
 
     print('-' * 20)
     for key in config:
@@ -233,7 +233,7 @@ def main():
 
     cudnn.benchmark = True
 
-    
+
 
     params = filter(lambda p: p.requires_grad, model.parameters())
     if config['optimizer'] == 'Adam':
