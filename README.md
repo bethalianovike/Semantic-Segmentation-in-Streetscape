@@ -1,4 +1,4 @@
-# Semantic-Segmentation-in-Streetscape
+# Semantic Segmentation in Streetscape
 Data Science Project 2020
 
 ## Requirements
@@ -57,3 +57,22 @@ python val_beth.py --name cityscapes_NestedUNet_wDS
 ```
 python val_beth.py --name cityscapes_NestedUNet_woDS
 ```
+
+## Results
+### Cityscape Dataset (Image size: 512x256)
+* **Loss Function: BCEDiceLoss**
+
+| Model                           | IoU        | Dice Coeff |
+| ------------------------------- | ---------- | ---------- |
+| UNet++ without Deep Supervision | **0.7934** | **0.8785** |
+| UNet++ with Deep Supervision    | 0.7767     | 0.8626     |
+| UNet                            | 0.7920     | 0.8776     |
+
+### Cityscape Dataset
+
+| Model                           | IoU        | Dice Coeff |
+| ------------------------------- | ---------- | ---------- |
+| UNet++ without Deep Supervision | 0.7934     | **0.8785** |
+| PSPNet                          | 0.8628     | 0.6771     |
+| HRNet-ORC                       | **0.8886** | 0.7405     |
+| UNet                            | 0.7920     | 0.8776     |
