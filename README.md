@@ -5,7 +5,9 @@ Data Science Project 2020
 * PyTorch 1.x or 0.41
 
 ## Installation
-`pip install -r requirements.txt`
+```
+pip install -r requirements.txt
+```
 
 ## Training on Cityscapes Dataset
 1. Download dataset from 
@@ -38,8 +40,20 @@ inputs
 ```
 2. Preprocess
 3. Train model
-```python train.py --dataset cityscapes --arch NestedUNet --num_classes 29 --deep_supervision True --epochs 200``` -> with Deep Supervision
-`python train.py --dataset cityscapes --arch NestedUNet --num_classes 29 --deep_supervision False --epochs 200` -> without Deep Supervision
+* with Deep Supervision
+```
+python train.py --dataset cityscapes --arch NestedUNet --num_classes 29 --deep_supervision True --epochs 200
+``` 
+* without Deep Supervision
+```
+python train.py --dataset cityscapes --arch NestedUNet --num_classes 29 --deep_supervision False --epochs 200
+```
 4. Evaluate and Visualize
-`python val_beth.py --name cityscapes_NestedUNet_wDS` -> with Deep Supervision
-`python val_beth.py --name cityscapes_NestedUNet_woDS` -> without Deep Supervision
+* with Deep Supervision
+```
+python val_beth.py --name cityscapes_NestedUNet_wDS
+```
+* without Deep Supervision
+```
+python val_beth.py --name cityscapes_NestedUNet_woDS
+```
