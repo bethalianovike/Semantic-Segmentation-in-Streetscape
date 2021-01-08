@@ -39,6 +39,9 @@ inputs
             ├── ...
 ```
 2. Preprocess
+```
+python preprocess.py
+```
 3. Train model
 * with Deep Supervision
 ```
