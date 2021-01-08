@@ -51,11 +51,11 @@ python train.py --dataset cityscapes --arch NestedUNet --num_classes 29 --deep_s
 4. Evaluate and Visualize
 * with Deep Supervision
 ```
-python val_beth.py --name cityscapes_NestedUNet_wDS
+python val.py --name cityscapes_NestedUNet_wDS
 ```
 * without Deep Supervision
 ```
-python val_beth.py --name cityscapes_NestedUNet_woDS
+python val.py --name cityscapes_NestedUNet_woDS
 ```
 
 ## Results

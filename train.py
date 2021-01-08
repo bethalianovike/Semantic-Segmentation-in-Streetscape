@@ -18,7 +18,7 @@ from tqdm import tqdm
 import archs
 import losses
 from dataset import Dataset
-from metrics import iou_score, dice_coef
+from metrics import iou_score
 from utils import AverageMeter, str2bool
 
 ARCH_NAMES = archs.__all__
@@ -95,6 +95,7 @@ def parse_args():
                         metavar='N', help='early stopping (default: -1)')
 
     parser.add_argument('--num_workers', default=4, type=int)
+    parser.add_argument('--resume',default=False ,type=bool)
 
     config = parser.parse_args()
 
@@ -103,8 +104,7 @@ def parse_args():
 
 def train(config, train_loader, model, criterion, optimizer):
     avg_meters = {'loss': AverageMeter(),
-                  'iou': AverageMeter(),
-                  'dice': AverageMeter()}
+                  'iou': AverageMeter()}
 
     model.train()
 
@@ -121,12 +121,10 @@ def train(config, train_loader, model, criterion, optimizer):
                 loss += criterion(output, target)
             loss /= len(outputs)
             iou = iou_score(outputs[-1], target)
-            dice = dice_coef(outputs[-1], target)
         else:
             output = model(input)
             loss = criterion(output, target)
             iou = iou_score(output, target)
-            dice = dice_coef(output, target)
 
         # compute gradient and do optimizing step
         optimizer.zero_grad()
@@ -135,26 +133,22 @@ def train(config, train_loader, model, criterion, optimizer):
 
         avg_meters['loss'].update(loss.item(), input.size(0))
         avg_meters['iou'].update(iou, input.size(0))
-        avg_meters['dice'].update(dice, input.size(0))
 
         postfix = OrderedDict([
             ('loss', avg_meters['loss'].avg),
             ('iou', avg_meters['iou'].avg),
-            ('dice', avg_meters['dice'].avg),
         ])
         pbar.set_postfix(postfix)
         pbar.update(1)
     pbar.close()
 
     return OrderedDict([('loss', avg_meters['loss'].avg),
-                        ('iou', avg_meters['iou'].avg),
-                        ('dice', avg_meters['dice'].avg)])
+                        ('iou', avg_meters['iou'].avg)])
 
 
 def validate(config, val_loader, model, criterion):
     avg_meters = {'loss': AverageMeter(),
-                  'iou': AverageMeter(),
-                  'dice': AverageMeter()}
+                  'iou': AverageMeter()}
 
     # switch to evaluate mode
     model.eval()
@@ -173,29 +167,24 @@ def validate(config, val_loader, model, criterion):
                     loss += criterion(output, target)
                 loss /= len(outputs)
                 iou = iou_score(outputs[-1], target)
-                dice = dice_coef(outputs[-1], target)
             else:
                 output = model(input)
                 loss = criterion(output, target)
                 iou = iou_score(output, target)
-                dice = dice_coef(output, target)
 
             avg_meters['loss'].update(loss.item(), input.size(0))
             avg_meters['iou'].update(iou, input.size(0))
-            avg_meters['dice'].update(dice, input.size(0))
 
             postfix = OrderedDict([
                 ('loss', avg_meters['loss'].avg),
                 ('iou', avg_meters['iou'].avg),
-                ('dice', avg_meters['dice'].avg),
             ])
             pbar.set_postfix(postfix)
             pbar.update(1)
         pbar.close()
 
     return OrderedDict([('loss', avg_meters['loss'].avg),
-                        ('iou', avg_meters['iou'].avg),
-                        ('dice', avg_meters['dice'].avg)])
+                        ('iou', avg_meters['iou'].avg)])
 
 
 def main():
@@ -206,7 +195,27 @@ def main():
             config['name'] = '%s_%s_wDS' % (config['dataset'], config['arch'])
         else:
             config['name'] = '%s_%s_woDS' % (config['dataset'], config['arch'])
-    os.makedirs('models/%s' % config['name'], exist_ok=True)
+
+        os.makedirs('models/%s' % config['name'], exist_ok=True)
+    else:
+        if config['resume'] == True:
+            model = archs.__dict__[config['arch']](config['num_classes'],
+                                           config['input_channels'],
+                                           config['deep_supervision'])
+            model = model.cuda()
+            model.load_state_dict(torch.load('models/%s/model.pth' %
+                                     config['name']))
+            model.eval()
+        else : 
+            os.makedirs('models/%s' % config['name'], exist_ok=True)
+            # create model
+            print("=> creating model %s" % config['arch'])
+            model = model.cuda()
+            model = archs.__dict__[config['arch']](config['num_classes'],
+                                           config['input_channels'],
+                                           config['deep_supervision'])
+
+
 
     print('-' * 20)
     for key in config:
@@ -224,13 +233,7 @@ def main():
 
     cudnn.benchmark = True
 
-    # create model
-    print("=> creating model %s" % config['arch'])
-    model = archs.__dict__[config['arch']](config['num_classes'],
-                                           config['input_channels'],
-                                           config['deep_supervision'])
 
-    model = model.cuda()
 
     params = filter(lambda p: p.requires_grad, model.parameters())
     if config['optimizer'] == 'Adam':
@@ -313,10 +316,8 @@ def main():
         ('lr', []),
         ('loss', []),
         ('iou', []),
-        ('dice', []),
         ('val_loss', []),
         ('val_iou', []),
-        ('val_dice', []),
     ])
 
     best_iou = 0
@@ -334,17 +335,15 @@ def main():
         elif config['scheduler'] == 'ReduceLROnPlateau':
             scheduler.step(val_log['loss'])
 
-        print('loss %.4f - iou %.4f - dice %.4f - val_loss %.4f - val_iou %.4f - val_dice %.4f'
-              % (train_log['loss'], train_log['iou'], train_log['dice'], val_log['loss'], val_log['iou'], val_log['dice']))
+        print('loss %.4f - iou %.4f - val_loss %.4f - val_iou %.4f'
+              % (train_log['loss'], train_log['iou'], val_log['loss'], val_log['iou']))
 
         log['epoch'].append(epoch)
         log['lr'].append(config['lr'])
         log['loss'].append(train_log['loss'])
         log['iou'].append(train_log['iou'])
-        log['dice'].append(train_log['dice'])
         log['val_loss'].append(val_log['loss'])
         log['val_iou'].append(val_log['iou'])
-        log['val_dice'].append(val_log['dice'])
 
         pd.DataFrame(log).to_csv('models/%s/log.csv' %
                                  config['name'], index=False)
